@@ -370,7 +370,7 @@ function SessionPage() {
             </div>
             
             {/* OUTPUT PANEL */}
-            <div className="h-32 border-t border-base-300 flex-shrink-0">
+            <div className="h-48 border-t border-base-300 flex-shrink-0">
               <OutputPanel output={output} />
             </div>
           </div>
