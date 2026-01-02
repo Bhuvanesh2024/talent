@@ -2,10 +2,28 @@ services:
   - type: web
     name: talentiq-backend
     env: node
-    buildCommand: npm run build
-    startCommand: npm start
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+      - key: DB_URL
+        value: mongodb+srv://bhuvanesh3602:seceaids2024@cluster0.jiqgost.mongodb.net/talentiqDB
+      - key: INNGEST_EVENT_KEY
+        value: 5PEBfRYxc6ZD0bzFNQtarrnwlQx7sSd_SFP0sBd4gIWB75K70hg__si0oxFS-JJZ_LMimdDZXXoFadK-qPv3kA
+      - key: INNGEST_SIGNING_KEY
+        value: signkey-prod-278ce65da0aa556eb22382ccc7ea1860c9efa2137a401e752f5080e897cfdc86
+      - key: STREAM_API_KEY
+        value: a62dzuacnx3g
+      - key: STREAM_API_SECRET
+        value: suahfb56yqqjq4wmwq6zb9ejqa3vqsm7et2jecsed6444v49mgt47rw9pjuu46kc
+      - key: CLERK_PUBLISHABLE_KEY
+        value: pk_test_dXByaWdodC10cmVlZnJvZy03OC5jbGVyay5hY2NvdW50cy5kZXYk
+      - key: CLERK_SECRET_KEY
+        value: sk_test_qXxUWdhXh5BXmgPim0JHuH25C1zMN52Sov1kH6VKUi
+      - key: CLIENT_URL
+        value: https://talentiq11-phi.vercel.app
