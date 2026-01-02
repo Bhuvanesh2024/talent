@@ -6,11 +6,39 @@ import {
   UsersIcon,
   ZapIcon,
   LoaderIcon,
+  ShareIcon,
+  UserPlusIcon,
 } from "lucide-react";
 import { Link } from "react-router";
 import { getDifficultyBadgeClass } from "../lib/utils";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import InviteUserModal from "./InviteUserModal";
 
 function ActiveSessions({ sessions, isLoading, isUserInSession }) {
+  const [inviteModal, setInviteModal] = useState({ isOpen: false, sessionId: null, sessionTitle: "" });
+  
+  const handleShareLink = async (sessionId) => {
+    const meetingLink = `${window.location.origin}/session/${sessionId}`;
+    
+    try {
+      await navigator.clipboard.writeText(meetingLink);
+      toast.success("Meeting link copied to clipboard!");
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea");
+      textArea.value = meetingLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+      toast.success("Meeting link copied to clipboard!");
+    }
+  };
+
+  const handleInviteUser = (sessionId, sessionTitle) => {
+    setInviteModal({ isOpen: true, sessionId, sessionTitle });
+  };
   return (
     <div className="lg:col-span-2 card bg-base-100 border-2 border-primary/20 hover:border-primary/30 h-full">
       <div className="card-body">
@@ -81,14 +109,38 @@ function ActiveSessions({ sessions, isLoading, isUserInSession }) {
                     </div>
                   </div>
 
-                  {session.participant && !isUserInSession(session) ? (
-                    <button className="btn btn-disabled btn-sm">Full</button>
-                  ) : (
-                    <Link to={`/session/${session._id}`} className="btn btn-primary btn-sm gap-2">
-                      {isUserInSession(session) ? "Rejoin" : "Join"}
-                      <ArrowRightIcon className="size-4" />
-                    </Link>
-                  )}
+                  {/* RIGHT SIDE - ACTIONS */}
+                  <div className="flex items-center gap-2">
+                    {/* Invite User Button */}
+                    <button
+                      onClick={() => handleInviteUser(session._id, session.problem)}
+                      className="btn btn-success btn-sm gap-1"
+                      title="Invite candidate"
+                    >
+                      <UserPlusIcon className="size-4" />
+                      Invite
+                    </button>
+                    
+                    {/* Share Link Button */}
+                    <button
+                      onClick={() => handleShareLink(session._id)}
+                      className="btn btn-ghost btn-sm gap-1"
+                      title="Copy meeting link"
+                    >
+                      <ShareIcon className="size-4" />
+                      Share
+                    </button>
+                    
+                    {/* Join Button */}
+                    {session.participant && !isUserInSession(session) ? (
+                      <button className="btn btn-disabled btn-sm">Full</button>
+                    ) : (
+                      <Link to={`/session/${session._id}`} className="btn btn-primary btn-sm gap-2">
+                        {isUserInSession(session) ? "Rejoin" : "Join"}
+                        <ArrowRightIcon className="size-4" />
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
             ))
@@ -103,6 +155,14 @@ function ActiveSessions({ sessions, isLoading, isUserInSession }) {
           )}
         </div>
       </div>
+      
+      {/* Invite User Modal */}
+      <InviteUserModal
+        isOpen={inviteModal.isOpen}
+        onClose={() => setInviteModal({ isOpen: false, sessionId: null, sessionTitle: "" })}
+        sessionId={inviteModal.sessionId}
+        sessionTitle={inviteModal.sessionTitle}
+      />
     </div>
   );
 }

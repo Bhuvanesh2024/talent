@@ -1,93 +1,55 @@
 import { useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
 import toast from "react-hot-toast";
 import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { getDifficultyBadgeClass } from "../lib/utils";
-import { Loader2Icon, LogOutIcon, PhoneOffIcon, ShareIcon, UserPlusIcon } from "lucide-react";
+import { Loader2Icon, ArrowLeftIcon } from "lucide-react";
 import CodeEditorPanel from "../components/CodeEditorPanel";
 import OutputPanel from "../components/OutputPanel";
 
-import useStreamClient from "../hooks/useStreamClient";
-import { StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
-import VideoCallUI from "../components/VideoCallUI";
-import ShareLinkModal from "../components/ShareLinkModal";
-import InviteUserModal from "../components/InviteUserModal";
-
-function SessionPage() {
+function PracticePage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-
-  const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
-
-  const joinSessionMutation = useJoinSession();
-  const endSessionMutation = useEndSession();
-
-  const session = sessionData?.session;
-  const isHost = session?.host?.clerkId === user?.id;
-  const isParticipant = session?.participant?.clerkId === user?.id;
-
-  const { call, channel, chatClient, isInitializingCall, streamClient } = useStreamClient(
-    session,
-    loadingSession,
-    isHost,
-    isParticipant
-  );
-
-  // find the problem data based on session problem title
+  
   const [problemData, setProblemData] = useState(null);
-  const [loadingProblem, setLoadingProblem] = useState(false);
+  const [loadingProblem, setLoadingProblem] = useState(true);
 
-  // Fetch problem data when session loads
+  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
+  const [code, setCode] = useState("");
+
+  // Fetch problem data
   useEffect(() => {
     const fetchProblem = async () => {
-      if (!session?.problem) return;
+      if (!id) return;
       
       setLoadingProblem(true);
       try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/problems/title/${encodeURIComponent(session.problem)}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/problems/${id}`);
         if (response.ok) {
           const data = await response.json();
           setProblemData(data.problem);
+          setCode(data.problem.starterCode?.[selectedLanguage] || "");
+        } else {
+          toast.error("Problem not found");
+          navigate("/problems");
         }
       } catch (error) {
         console.error("Error fetching problem:", error);
+        toast.error("Failed to load problem");
       } finally {
         setLoadingProblem(false);
       }
     };
 
     fetchProblem();
-  }, [session?.problem]);
+  }, [id, navigate]);
 
-  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(problemData?.starterCode?.[selectedLanguage] || "");
-
-  // auto-join session if user is not already a participant and not the host
-  useEffect(() => {
-    if (!session || !user || loadingSession) return;
-    if (isHost || isParticipant) return;
-
-    joinSessionMutation.mutate(id);
-  }, [session?._id, user?.id, loadingSession, isHost, isParticipant, id, joinSessionMutation]);
-
-  // redirect the "participant" when session ends
-  useEffect(() => {
-    if (!session || loadingSession) return;
-
-    if (session.status === "completed") {
-      navigate("/dashboard");
-    }
-  }, [session?.status, loadingSession, navigate]);
-
-  // update code when problem loads or changes
+  // Update code when language changes
   useEffect(() => {
     if (problemData?.starterCode?.[selectedLanguage]) {
       setCode(problemData.starterCode[selectedLanguage]);
@@ -97,26 +59,20 @@ function SessionPage() {
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    // use problem-specific starter code
     const starterCode = problemData?.starterCode?.[newLang] || "";
     setCode(starterCode);
     setOutput(null);
   };
 
   const handleRunCode = async () => {
-    console.log('🚀 Starting code execution...');
-    console.log('Language:', selectedLanguage);
-    console.log('Code:', code);
-    
     setIsRunning(true);
     setOutput(null);
 
     try {
       const result = await executeCode(selectedLanguage, code);
-      console.log('📊 Execution result:', result);
       setOutput(result);
     } catch (error) {
-      console.error('💥 Code execution failed:', error);
+      console.error("Code execution failed:", error);
       setOutput({
         success: false,
         error: `Execution failed: ${error.message}`,
@@ -175,50 +131,32 @@ function SessionPage() {
     }
   };
 
-  const handleEndSession = () => {
-    if (confirm("Are you sure you want to end this session? All participants will be notified.")) {
-      // this will navigate the HOST to dashboard
-      endSessionMutation.mutate(id, { onSuccess: () => navigate("/dashboard") });
-    }
-  };
-
-  const handleShareMeetingLink = () => {
-    setShowShareModal(true);
-  };
-
-  const handleInviteUser = () => {
-    setShowInviteModal(true);
-  };
-
-  // Show loading state
-  if (loadingSession) {
+  if (loadingProblem) {
     return (
       <div className="h-screen bg-base-100 flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <Loader2Icon className="w-12 h-12 mx-auto animate-spin text-primary mb-4" />
-            <p className="text-lg">Loading session...</p>
+            <p className="text-lg">Loading problem...</p>
           </div>
         </div>
       </div>
     );
   }
 
-  // Show error state if no session found
-  if (!session && !loadingSession) {
+  if (!problemData) {
     return (
       <div className="h-screen bg-base-100 flex flex-col">
         <Navbar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <PhoneOffIcon className="w-12 h-12 mx-auto text-error mb-4" />
-            <p className="text-lg">Session not found</p>
+            <p className="text-lg">Problem not found</p>
             <button 
-              onClick={() => navigate("/dashboard")} 
+              onClick={() => navigate("/problems")} 
               className="btn btn-primary mt-4"
             >
-              Back to Dashboard
+              Back to Problems
             </button>
           </div>
         </div>
@@ -240,72 +178,41 @@ function SessionPage() {
               <div className="sticky top-0 bg-base-100 border-b border-base-300 p-4 z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <h1 className="text-2xl font-bold text-base-content">
-                      {session?.problem || "Loading..."}
-                    </h1>
-                    <span className={`badge ${getDifficultyBadgeClass(session?.difficulty)}`}>
-                      {session?.difficulty?.charAt(0).toUpperCase() + session?.difficulty?.slice(1) || "Easy"}
-                    </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
                     <button
-                      onClick={handleInviteUser}
-                      className="btn btn-success btn-sm gap-1"
-                      title="Invite candidate"
-                    >
-                      <UserPlusIcon className="w-4 h-4" />
-                      Invite
-                    </button>
-                    
-                    <button
-                      onClick={handleShareMeetingLink}
+                      onClick={() => navigate("/problems")}
                       className="btn btn-ghost btn-sm gap-1"
-                      title="Share link"
                     >
-                      <ShareIcon className="w-4 h-4" />
-                      Share
+                      <ArrowLeftIcon className="w-4 h-4" />
+                      Back
                     </button>
-                    
-                    {isHost && session?.status === "active" && (
-                      <button
-                        onClick={handleEndSession}
-                        disabled={endSessionMutation.isPending}
-                        className="btn btn-error btn-sm gap-1"
-                      >
-                        {endSessionMutation.isPending ? (
-                          <Loader2Icon className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <LogOutIcon className="w-4 h-4" />
-                        )}
-                        End
-                      </button>
-                    )}
+                    <h1 className="text-2xl font-bold text-base-content">
+                      {problemData.title}
+                    </h1>
+                    <span className={`badge ${getDifficultyBadgeClass(problemData.difficulty)}`}>
+                      {problemData.difficulty?.charAt(0).toUpperCase() + problemData.difficulty?.slice(1)}
+                    </span>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-4 text-sm text-base-content/60 mt-2">
-                  <span>Host: {session?.host?.name}</span>
+                  <span>Category: {problemData.category}</span>
                   <span>•</span>
-                  <span>{session?.participant ? "2/2" : "1/2"} participants</span>
+                  <span>Practice Mode</span>
                 </div>
               </div>
 
               {/* PROBLEM CONTENT */}
               <div className="p-6 space-y-6">
-                {problemData?.description && (
-                  <div>
-                    <h3 className="text-lg font-semibold mb-3">Description</h3>
-                    <div className="prose prose-sm max-w-none">
-                      <p className="text-base-content/90 leading-relaxed">{problemData.description.text}</p>
-                      {problemData.description.notes?.map((note, idx) => (
-                        <p key={idx} className="text-base-content/90 leading-relaxed mt-2">{note}</p>
-                      ))}
-                    </div>
+                <div>
+                  <h3 className="text-lg font-semibold mb-3">Description</h3>
+                  <div className="prose prose-sm max-w-none">
+                    <p className="text-base-content/90 leading-relaxed whitespace-pre-line">
+                      {problemData.description}
+                    </p>
                   </div>
-                )}
+                </div>
 
-                {problemData?.examples && (
+                {problemData.examples && (
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Examples</h3>
                     <div className="space-y-4">
@@ -337,7 +244,7 @@ function SessionPage() {
                   </div>
                 )}
 
-                {problemData?.constraints && (
+                {problemData.constraints && (
                   <div>
                     <h3 className="text-lg font-semibold mb-3">Constraints</h3>
                     <ul className="space-y-1 text-sm text-base-content/80">
@@ -375,53 +282,9 @@ function SessionPage() {
             </div>
           </div>
         </div>
-
-        {/* RIGHT PANEL - VIDEO CALL */}
-        <div className="w-96 border-l border-base-300 bg-base-200">
-          <div className="h-full p-4">
-            {isInitializingCall ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <Loader2Icon className="w-8 h-8 mx-auto animate-spin text-primary mb-2" />
-                  <p className="text-sm">Connecting...</p>
-                </div>
-              </div>
-            ) : !streamClient || !call ? (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center">
-                  <PhoneOffIcon className="w-12 h-12 mx-auto text-error mb-2" />
-                  <p className="text-sm text-base-content/70">Connection Failed</p>
-                </div>
-              </div>
-            ) : (
-              <div className="h-full">
-                <StreamVideo client={streamClient}>
-                  <StreamCall call={call}>
-                    <VideoCallUI chatClient={chatClient} channel={channel} />
-                  </StreamCall>
-                </StreamVideo>
-              </div>
-            )}
-          </div>
-        </div>
       </div>
-      
-      {/* MODALS */}
-      <ShareLinkModal
-        isOpen={showShareModal}
-        onClose={() => setShowShareModal(false)}
-        sessionId={id}
-        sessionTitle={session?.problem || "Interview Session"}
-      />
-      
-      <InviteUserModal
-        isOpen={showInviteModal}
-        onClose={() => setShowInviteModal(false)}
-        sessionId={id}
-        sessionTitle={session?.problem || "Interview Session"}
-      />
     </div>
   );
 }
 
-export default SessionPage;
+export default PracticePage;

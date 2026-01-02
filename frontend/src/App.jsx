@@ -7,6 +7,10 @@ import DashboardPage from "./pages/DashboardPage";
 import ProblemPage from "./pages/ProblemPage";
 import ProblemsPage from "./pages/ProblemsPage";
 import SessionPage from "./pages/SessionPage";
+import CreateProblemPage from "./pages/CreateProblemPage";
+import ProblemsListPage from "./pages/ProblemsListPage";
+import PracticeProblemsPage from "./pages/PracticeProblemsPage";
+import PracticePage from "./pages/PracticePage";
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
@@ -20,7 +24,10 @@ function App() {
         <Route path="/" element={!isSignedIn ? <HomePage /> : <Navigate to={"/dashboard"} />} />
         <Route path="/dashboard" element={isSignedIn ? <DashboardPage /> : <Navigate to={"/"} />} />
 
-        <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to={"/"} />} />
+        <Route path="/problems" element={isSignedIn ? <PracticeProblemsPage /> : <Navigate to={"/"} />} />
+        <Route path="/practice/:id" element={isSignedIn ? <PracticePage /> : <Navigate to={"/"} />} />
+        <Route path="/problems-list" element={isSignedIn ? <ProblemsListPage /> : <Navigate to={"/"} />} />
+        <Route path="/create-problem" element={isSignedIn ? <CreateProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/problem/:id" element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/session/:id" element={isSignedIn ? <SessionPage /> : <Navigate to={"/"} />} />
       </Routes>

@@ -1,6 +1,5 @@
 import Editor from "@monaco-editor/react";
 import { Loader2Icon, PlayIcon } from "lucide-react";
-import { LANGUAGE_CONFIG } from "../data/problems";
 
 function CodeEditorPanel({
   selectedLanguage,
@@ -9,18 +8,26 @@ function CodeEditorPanel({
   onLanguageChange,
   onCodeChange,
   onRunCode,
+  onSubmitCode,
 }) {
+  const languageOptions = {
+    javascript: { name: "JavaScript", monacoLang: "javascript" },
+    python: { name: "Python", monacoLang: "python" },
+    java: { name: "Java", monacoLang: "java" },
+  };
+
   return (
-    <div className="h-full bg-base-300 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 bg-base-100 border-t border-base-300">
+    <div className="h-full bg-base-100 flex flex-col border border-base-300">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 bg-base-200 border-b border-base-300">
         <div className="flex items-center gap-3">
-          <img
-            src={LANGUAGE_CONFIG[selectedLanguage].icon}
-            alt={LANGUAGE_CONFIG[selectedLanguage].name}
-            className="size-6"
-          />
-          <select className="select select-sm" value={selectedLanguage} onChange={onLanguageChange}>
-            {Object.entries(LANGUAGE_CONFIG).map(([key, lang]) => (
+          <span className="text-sm font-medium">Code Editor</span>
+          <select 
+            className="select select-bordered select-sm" 
+            value={selectedLanguage} 
+            onChange={onLanguageChange}
+          >
+            {Object.entries(languageOptions).map(([key, lang]) => (
               <option key={key} value={key}>
                 {lang.name}
               </option>
@@ -28,34 +35,61 @@ function CodeEditorPanel({
           </select>
         </div>
 
-        <button className="btn btn-primary btn-sm gap-2" disabled={isRunning} onClick={onRunCode}>
-          {isRunning ? (
-            <>
-              <Loader2Icon className="size-4 animate-spin" />
-              Running...
-            </>
-          ) : (
-            <>
-              <PlayIcon className="size-4" />
-              Run Code
-            </>
+        <div className="flex items-center gap-2">
+          <button 
+            className="btn btn-outline btn-sm gap-1" 
+            disabled={isRunning} 
+            onClick={onRunCode}
+          >
+            {isRunning ? (
+              <>
+                <Loader2Icon className="w-4 h-4 animate-spin" />
+                Running...
+              </>
+            ) : (
+              <>
+                <PlayIcon className="w-4 h-4" />
+                Run
+              </>
+            )}
+          </button>
+          
+          {onSubmitCode && (
+            <button 
+              className="btn btn-success btn-sm" 
+              disabled={isRunning} 
+              onClick={onSubmitCode}
+            >
+              {isRunning ? (
+                <>
+                  <Loader2Icon className="w-4 h-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
+            </button>
           )}
-        </button>
+        </div>
       </div>
 
-      <div className="flex-1">
+      {/* Editor */}
+      <div className="flex-1 bg-gray-900">
         <Editor
-          height={"100%"}
-          language={LANGUAGE_CONFIG[selectedLanguage].monacoLang}
+          height="100%"
+          language={languageOptions[selectedLanguage].monacoLang}
           value={code}
           onChange={onCodeChange}
           theme="vs-dark"
           options={{
-            fontSize: 16,
+            fontSize: 14,
             lineNumbers: "on",
             scrollBeyondLastLine: false,
             automaticLayout: true,
             minimap: { enabled: false },
+            wordWrap: "on",
+            tabSize: 2,
+            insertSpaces: true,
           }}
         />
       </div>

@@ -16,9 +16,18 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
     let chatClientInstance = null;
 
     const initCall = async () => {
-      if (!session?.callId) return;
-      if (!isHost && !isParticipant) return;
-      if (session.status === "completed") return;
+      if (!session?.callId) {
+        setIsInitializingCall(false);
+        return;
+      }
+      if (!isHost && !isParticipant) {
+        setIsInitializingCall(false);
+        return;
+      }
+      if (session.status === "completed") {
+        setIsInitializingCall(false);
+        return;
+      }
 
       try {
         const { token, userId, userName, userImage } = await sessionApi.getStreamToken();
@@ -62,11 +71,13 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
       }
     };
 
-    if (session && !loadingSession) initCall();
+    if (session && !loadingSession) {
+      initCall();
+    } else {
+      setIsInitializingCall(false);
+    }
 
-    // cleanup - performance reasons
     return () => {
-      // iife
       (async () => {
         try {
           if (videoCall) await videoCall.leave();
@@ -77,7 +88,7 @@ function useStreamClient(session, loadingSession, isHost, isParticipant) {
         }
       })();
     };
-  }, [session, loadingSession, isHost, isParticipant]);
+  }, [session?.callId, session?.status, loadingSession, isHost, isParticipant]);
 
   return {
     streamClient,

@@ -278,13 +278,6 @@ We welcome contributions! Please follow these steps:
 5. Open a Pull Request
 
 ---
-
-## 📄 **License**
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 🙏 **Acknowledgments**
 
 - **Stream.io** for providing excellent video and chat infrastructure
@@ -297,18 +290,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 **Support**
 
-- 📧 Email: support@talentiq.com
-- 💬 Discord: [Join our community](https://discord.gg/talentiq)
-- 📖 Documentation: [docs.talentiq.com](https://docs.talentiq.com)
-- 🐛 Issues: [GitHub Issues](https://github.com/yourusername/talent-iq/issues)
+- 📧 Email: bhuvanesh.s2024aids@sece.ac.in
 
 ---
-
-<div align="center">
-
-**Made with ❤️ by the TalentIQ Team**
-
-[⭐ Star this repo](https://github.com/yourusername/talent-iq) | [🐛 Report Bug](https://github.com/yourusername/talent-iq/issues) | [💡 Request Feature](https://github.com/yourusername/talent-iq/issues)
-
-</div>#   T a l e n t I Q - I n t e r v i e w  
- 
