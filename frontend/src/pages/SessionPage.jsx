@@ -80,12 +80,26 @@ function SessionPage() {
   };
 
   const handleRunCode = async () => {
+    console.log('🚀 Starting code execution...');
+    console.log('Language:', selectedLanguage);
+    console.log('Code:', code);
+    
     setIsRunning(true);
     setOutput(null);
 
-    const result = await executeCode(selectedLanguage, code);
-    setOutput(result);
-    setIsRunning(false);
+    try {
+      const result = await executeCode(selectedLanguage, code);
+      console.log('📊 Execution result:', result);
+      setOutput(result);
+    } catch (error) {
+      console.error('💥 Code execution failed:', error);
+      setOutput({
+        success: false,
+        error: `Execution failed: ${error.message}`,
+      });
+    } finally {
+      setIsRunning(false);
+    }
   };
 
   const handleEndSession = () => {
