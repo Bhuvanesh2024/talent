@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Test</title>
+</head>
+<body>
+    <h1>Backend Connectivity Test</h1>
+    <button onclick="testHealth()">Test Health</button>
+    <button onclick="testDB()">Test Database</button>
+    <button onclick="testStream()">Test Stream</button>
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'https://talentiq-8bl3.onrender.com';
+        
+        async function testHealth() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<p>Health: ${JSON.stringify(data)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Health Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testDB() {
+            try {
+                const response = await fetch(`${API_URL}/test-db`);
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<p>DB: ${JSON.stringify(data)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>DB Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testStream() {
+            try {
+                const response = await fetch(`${API_URL}/test-stream`);
+                const data = await response.json();
+                document.getElementById('results').innerHTML = `<p>Stream: ${JSON.stringify(data)}</p>`;
+            } catch (error) {
+                document.getElementById('results').innerHTML = `<p>Stream Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

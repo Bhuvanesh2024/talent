@@ -22,18 +22,27 @@ function DashboardPage() {
   const { data: recentSessionsData, isLoading: loadingRecentSessions } = useMyRecentSessions();
 
   const handleCreateRoom = () => {
-    if (!roomConfig.problem || !roomConfig.difficulty) return;
+    if (!roomConfig.problem || !roomConfig.difficulty) {
+      toast.error("Please select a problem first");
+      return;
+    }
+
+    console.log("Creating session with:", roomConfig);
 
     createSessionMutation.mutate(
       {
         problem: roomConfig.problem,
-        difficulty: roomConfig.difficulty.toLowerCase(),
+        difficulty: roomConfig.difficulty,
       },
       {
         onSuccess: (data) => {
+          console.log("Session created:", data);
           setShowCreateModal(false);
           navigate(`/session/${data.session._id}`);
         },
+        onError: (error) => {
+          console.error("Session creation failed:", error);
+        }
       }
     );
   };

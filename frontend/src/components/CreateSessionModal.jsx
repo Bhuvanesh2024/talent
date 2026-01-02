@@ -1,5 +1,5 @@
 import { Code2Icon, LoaderIcon, PlusIcon } from "lucide-react";
-import { PROBLEMS } from "../data/problems";
+import { useEffect, useState } from "react";
 
 function CreateSessionModal({
   isOpen,
@@ -9,7 +9,30 @@ function CreateSessionModal({
   onCreateRoom,
   isCreating,
 }) {
-  const problems = Object.values(PROBLEMS);
+  const [problems, setProblems] = useState([]);
+  const [loadingProblems, setLoadingProblems] = useState(false);
+
+  // Fetch problems from API
+  useEffect(() => {
+    const fetchProblems = async () => {
+      if (!isOpen) return;
+      
+      setLoadingProblems(true);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/problems`);
+        if (response.ok) {
+          const data = await response.json();
+          setProblems(data.problems || []);
+        }
+      } catch (error) {
+        console.error("Error fetching problems:", error);
+      } finally {
+        setLoadingProblems(false);
+      }
+    };
+
+    fetchProblems();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -32,18 +55,19 @@ function CreateSessionModal({
               onChange={(e) => {
                 const selectedProblem = problems.find((p) => p.title === e.target.value);
                 setRoomConfig({
-                  difficulty: selectedProblem.difficulty,
+                  difficulty: selectedProblem?.difficulty?.toLowerCase() || "",
                   problem: e.target.value,
                 });
               }}
+              disabled={loadingProblems}
             >
               <option value="" disabled>
-                Choose a coding problem...
+                {loadingProblems ? "Loading problems..." : "Choose a coding problem..."}
               </option>
 
               {problems.map((problem) => (
-                <option key={problem.id} value={problem.title}>
-                  {problem.title} ({problem.difficulty})
+                <option key={problem._id} value={problem.title}>
+                  {problem.title} ({problem.difficulty.charAt(0).toUpperCase() + problem.difficulty.slice(1)})
                 </option>
               ))}
             </select>

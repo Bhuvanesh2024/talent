@@ -14,12 +14,23 @@ export async function createSession(req, res) {
       return res.status(400).json({ message: "Problem and difficulty are required" });
     }
 
+    // Validate difficulty enum
+    const validDifficulties = ["easy", "medium", "hard"];
+    if (!validDifficulties.includes(difficulty.toLowerCase())) {
+      return res.status(400).json({ message: "Invalid difficulty level" });
+    }
+
     // generate a unique call id for stream video
     const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
 
     // create session in db
     console.log("💾 Attempting to save session to database...");
-    const session = await Session.create({ problem, difficulty, host: userId, callId });
+    const session = await Session.create({ 
+      problem, 
+      difficulty: difficulty.toLowerCase(), 
+      host: userId, 
+      callId 
+    });
     console.log("✅ Session created successfully:", session._id);
 
     // Create/update user in Stream before creating call
