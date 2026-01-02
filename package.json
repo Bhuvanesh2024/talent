@@ -1,10 +1,11 @@
 {
   "name": "talent-iq",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "backend/src/server.js",
   "scripts": {
-    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
-    "start": "npm run start --prefix backend"
+    "build": "cd backend && npm install",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev"
   },
   "keywords": [],
   "author": "",
