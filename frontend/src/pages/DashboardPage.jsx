@@ -10,6 +10,7 @@ import ActiveSessions from "../components/ActiveSessions";
 import RecentSessions from "../components/RecentSessions";
 import CreateSessionModal from "../components/CreateSessionModal";
 import APITest from "../components/APITest";
+import EnvDebug from "../components/EnvDebug";
 
 function DashboardPage() {
   const navigate = useNavigate();
@@ -61,6 +62,7 @@ function DashboardPage() {
 
   return (
     <>
+      <EnvDebug />
       <div className="min-h-screen bg-base-300">
         <Navbar />
         <WelcomeSection onCreateSession={() => setShowCreateModal(true)} />

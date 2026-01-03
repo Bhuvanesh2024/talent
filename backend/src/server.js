@@ -23,7 +23,7 @@ const __dirname = path.resolve();
 app.use(express.json());
 // credentials:true meaning?? => server allows a browser to include cookies on request
 app.use(cors({ 
-  origin: true, 
+  origin: ["https://talentiq11-phi.vercel.app"], 
   credentials: true 
 }));
 app.use(clerkMiddleware()); // this adds auth field to request object: req.auth()
