@@ -19,10 +19,16 @@ function CreateSessionModal({
       
       setLoadingProblems(true);
       try {
+        console.log('Fetching problems from:', `${import.meta.env.VITE_API_URL}/problems`);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/problems`);
+        console.log('Problems response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
+          console.log('Problems data:', data);
           setProblems(data.problems || []);
+        } else {
+          console.error('Failed to fetch problems:', response.status);
         }
       } catch (error) {
         console.error("Error fetching problems:", error);
@@ -54,6 +60,7 @@ function CreateSessionModal({
               value={roomConfig.problem}
               onChange={(e) => {
                 const selectedProblem = problems.find((p) => p.title === e.target.value);
+                console.log('Selected problem:', selectedProblem);
                 setRoomConfig({
                   difficulty: selectedProblem?.difficulty?.toLowerCase() || "",
                   problem: e.target.value,

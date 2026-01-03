@@ -29,6 +29,7 @@ function DashboardPage() {
     }
 
     console.log("Creating session with:", roomConfig);
+    console.log("API URL:", import.meta.env.VITE_API_URL);
 
     createSessionMutation.mutate(
       {
@@ -43,6 +44,7 @@ function DashboardPage() {
         },
         onError: (error) => {
           console.error("Session creation failed:", error);
+          console.error("Error response:", error.response?.data);
         }
       }
     );

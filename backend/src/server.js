@@ -13,6 +13,7 @@ import { chatClient } from "./lib/stream.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import sessionRoutes from "./routes/sessionRoute.js";
 import problemRoutes from "./routes/problemRoutes.js";
+import { seedDatabase } from "./controllers/seedController.js";
 
 const app = express();
 
@@ -35,6 +36,17 @@ app.use("/api/problems", problemRoutes);
 app.get("/health", (req, res) => {
   res.status(200).json({ msg: "api is up and running" });
 });
+
+app.get("/test-auth", (req, res) => {
+  const authHeader = req.headers.authorization;
+  res.status(200).json({ 
+    message: "Auth test endpoint",
+    hasAuthHeader: !!authHeader,
+    authHeader: authHeader ? authHeader.substring(0, 20) + '...' : null
+  });
+});
+
+app.get("/seed-database", seedDatabase);
 
 app.get("/test-db", async (req, res) => {
   try {
