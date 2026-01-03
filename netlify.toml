@@ -3,6 +3,11 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  VITE_CLERK_PUBLISHABLE_KEY = "pk_test_dXByaWdodC10cmVlZnJvZy03OC5jbGVyay5hY2NvdW50cy5kZXYk"
+  VITE_API_URL = "https://talentiq-8bl3.onrender.com/api"
+  VITE_STREAM_API_KEY = "a62dzuacnx3g"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
